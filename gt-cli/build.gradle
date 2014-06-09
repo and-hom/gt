@@ -1,0 +1,32 @@
+apply plugin: 'application'
+mainClassName = 'ru.ahomyakov.gt.Cli'
+
+dependencies {
+    compile project.libraries.'commons-cli'
+    compile project(':gt-core')
+}
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+        attributes 'Main-Class': 'ru.ahomyakov.gt.Cli'
+        attributes 'Class-Path': 'gt-core-' + version + '.jar'
+    }
+}
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+run {
+    args '-m'
+    args 'Run with Gradle'
+}
+
+jar {
+    from ("${projectDir}/gt-core/src/main/resources/") {
+        include('logback.xml')
+    }
+}
+
+

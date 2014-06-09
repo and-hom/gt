@@ -1,0 +1,70 @@
+subprojects {
+    version = '1.0'
+
+    apply plugin: 'java'
+    apply plugin: 'maven-publish'
+    group = 'ru.yandex.andhom'
+
+
+    sourceCompatibility = 1.7
+
+    repositories {
+        mavenCentral()
+        mavenLocal()
+    }
+
+    // dependency management
+    project.ext {
+        libraries = [
+                'junit'      : 'junit:junit:4.11',
+                'commons-cli': 'commons-cli:commons-cli:1.2',
+                'logback'    : 'ch.qos.logback:logback-classic:1.1.2'
+        ]
+    }
+
+
+    test {
+        useJUnit()
+        testLogging.showStandardStreams = true
+
+        minHeapSize = "128m"
+        maxHeapSize = "512m"
+        jvmArgs '-XX:MaxPermSize=256m'
+
+        beforeTest { descriptor ->
+            logger.lifecycle("Running test: " + descriptor)
+        }
+        onOutput { descriptor, event ->
+            logger.lifecycle("Test: " + descriptor + " produced standard out/err: " + event.message)
+        }
+    }
+
+    sourceSets {
+        slowTest {
+            java {
+                srcDir 'src/slowTest/java'
+            }
+            resources {
+                srcDir 'src/slowTest/resources'
+            }
+            compileClasspath += sourceSets.main.runtimeClasspath
+        }
+    }
+
+    task slowTest(type: Test) {
+        testClassesDir = sourceSets.slowTest.output.classesDir
+        classpath += sourceSets.slowTest.runtimeClasspath
+    }
+
+    dependencies {
+        compile project.libraries.'logback'
+
+        testCompile project.libraries.'junit'
+        slowTestCompile project.libraries.'junit'
+    }
+
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.12'
+}
